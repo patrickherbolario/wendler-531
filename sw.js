@@ -1,5 +1,11 @@
-const CACHE = 'wendler-v1';
-const FILES = ['/', '/index.html', '/manifest.json'];
+const CACHE = 'wendler-v2';
+const FILES = [
+  '/wendler-531/',
+  '/wendler-531/index.html',
+  '/wendler-531/manifest.json',
+  '/wendler-531/icons/icon-192.png',
+  '/wendler-531/icons/icon-512.png',
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
@@ -15,6 +21,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/index.html')))
+    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/wendler-531/index.html')))
   );
 });
