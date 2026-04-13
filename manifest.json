@@ -2,7 +2,7 @@
   "name": "Wendler 5/3/1",
   "short_name": "531",
   "description": "Wendler 5/3/1 training app",
-  "start_url": "/index.html",
+  "start_url": "/wendler-531/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1F3864",
