@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#1F3864"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="531"/>
+<link rel="manifest" href="manifest.json"/>
+<title>Wendler 5/3/1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f4f5f7;color:#1a1a1a;min-height:100vh}
+.app{max-width:430px;margin:0 auto;padding:12px 12px 80px}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-top:4px}
+.top-bar h1{font-size:17px;font-weight:600;color:#1a1a1a}
+.top-right{display:flex;align-items:center;gap:8px}
+.cycle-pill{display:flex;align-items:center;gap:5px;background:#fff;border:1px solid #ddd;border-radius:20px;padding:5px 10px}
+.cycle-pill label{font-size:12px;color:#888}
+.cycle-pill input{width:34px;font-size:14px;font-weight:600;border:none;background:transparent;color:#1a1a1a;text-align:center;outline:none}
+.gear-btn{width:36px;height:36px;border-radius:50%;border:1px solid #ddd;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;color:#555}
+.week-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.week-tabs::-webkit-scrollbar{display:none}
+.wtab{flex-shrink:0;padding:7px 14px;font-size:13px;font-weight:500;border-radius:20px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;white-space:nowrap}
+.wtab.active{background:#1F3864;color:#fff;border-color:#1F3864}
+.wtab.deload.active{background:#4B2C75;border-color:#4B2C75}
+
+/* Settings panel */
+.settings-wrap{background:#fff;border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.settings-head{padding:12px 14px;background:#1F3864;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.settings-head h2{font-size:14px;font-weight:600}
+.settings-head button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;padding:0 2px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid #f0f0f0}
+.settings-row:last-of-type{border-bottom:none}
+.lift-info h3{font-size:14px;font-weight:600;color:#1a1a1a}
+.lift-info p{font-size:11px;color:#888;margin-top:2px}
+.input-group{display:flex;gap:10px}
+.input-col{display:flex;flex-direction:column;align-items:center;gap:3px}
+.input-col input{width:64px;font-size:14px;font-weight:600;text-align:center;padding:5px 4px;border:1px solid #ddd;border-radius:8px;background:#f8f8f8;color:#1a1a1a}
+.input-col label{font-size:10px;color:#999;font-weight:500}
+.settings-footer{padding:10px 14px;background:#f8f8f8;border-top:1px solid #f0f0f0}
+.settings-footer p{font-size:11px;color:#888;line-height:1.6}
+.save-badge{display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px;opacity:0;transition:opacity 0.3s}
+.save-badge.show{opacity:1}
+
+/* Lift cards */
+.lift-card{background:#fff;border-radius:14px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.lift-hdr{padding:11px 14px;display:flex;justify-content:space-between;align-items:center}
+.lift-hdr h2{font-size:14px;font-weight:600;color:#fff}
+.lift-hdr span{font-size:12px;color:rgba(255,255,255,0.85)}
+.tm-bar{padding:7px 14px;background:#f8f9fa;border-bottom:1px solid #f0f0f0;font-size:12px;color:#666}
+.tm-bar b{color:#1a1a1a;font-weight:600}
+.section-lbl{font-size:10px;font-weight:700;color:#aaa;letter-spacing:0.06em;text-transform:uppercase;padding:6px 14px 2px}
+.set-row{display:grid;grid-template-columns:76px 46px 1fr 80px;align-items:center;padding:9px 14px;border-bottom:1px solid #f5f5f5;gap:6px}
+.set-row:last-child{border-bottom:none}
+.set-row.wu{background:#fafafa}
+.set-row.amrap{background:#fffbf0}
+.s-label{font-size:12px;color:#888}
+.s-label.wt{font-weight:600;color:#1a1a1a;font-size:13px}
+.s-pct{font-size:12px;color:#aaa;text-align:center}
+.s-weight{font-size:18px;font-weight:700;color:#1a1a1a}
+.s-reps{font-size:13px;color:#666;text-align:right}
+.s-reps.amrap{color:#b45309;font-weight:700;font-size:14px}
+
+/* Accessory cards */
+.acc-section-lbl{font-size:10px;font-weight:700;color:#aaa;letter-spacing:0.06em;text-transform:uppercase;padding:6px 2px 4px;margin-bottom:2px}
+.acc-card{background:#fff;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.acc-hdr{padding:9px 14px;background:#f8f9fa;border-bottom:1px solid #f0f0f0}
+.acc-hdr h3{font-size:13px;font-weight:600;color:#1a1a1a}
+.acc-hdr p{font-size:11px;color:#888;margin-top:1px}
+.acc-body{padding:10px 14px}
+.acc-pair{display:flex;gap:8px;align-items:flex-start}
+.ss-badge{flex-shrink:0;font-size:10px;font-weight:700;background:#eef2ff;color:#4338ca;border-radius:4px;padding:2px 5px;margin-top:2px}
+.acc-side h4{font-size:13px;font-weight:600;color:#1a1a1a}
+.acc-side p{font-size:11px;color:#888;margin-top:1px}
+.acc-pills{display:flex;gap:5px;margin-top:5px}
+.acc-pill{font-size:11px;padding:2px 8px;border-radius:10px;background:#f0f0f0;color:#555}
+.acc-note{font-size:11px;color:#999;margin-top:7px;padding-top:7px;border-top:1px solid #f0f0f0;line-height:1.5}
+
+/* Deload */
+.deload-msg{text-align:center;padding:28px 16px 20px;background:#fff;border-radius:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.deload-msg h2{font-size:17px;font-weight:700;color:#4B2C75;margin-bottom:8px}
+.deload-msg p{font-size:14px;color:#666;line-height:1.7}
+
+/* Install banner */
+.install-banner{background:#1F3864;color:#fff;border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.install-banner p{font-size:13px;line-height:1.5}
+.install-banner b{display:block;font-size:14px;margin-bottom:2px}
+.install-btn{flex-shrink:0;background:#fff;color:#1F3864;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.dismiss-btn{background:none;border:none;color:rgba(255,255,255,0.7);font-size:20px;cursor:pointer;padding:0;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <h1>Wendler 5/3/1</h1>
+    <div class="top-right">
+      <div class="cycle-pill">
+        <label>Cycle</label>
+        <input type="number" id="cycleInput" min="1" value="1"/>
+      </div>
+      <button class="gear-btn" onclick="toggleSettings()">&#9881;</button>
+    </div>
+  </div>
+
+  <div id="installBanner"></div>
+
+  <div id="settingsWrap" style="display:none"></div>
+
+  <div class="week-tabs" id="weekTabs"></div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────
+const DEFAULT_LIFTS = [
+  {name:'Squat',         rm:225, inc:10, color:'#1F3864'},
+  {name:'Deadlift',      rm:225, inc:10, color:'#375623'},
+  {name:'Bench Press',   rm:135, inc:5,  color:'#7B2C2C'},
+  {name:'Overhead Press',rm:95,  inc:5,  color:'#4B2C75'},
+];
+
+const WEEKS = [
+  {label:'Wks 1 & 4', scheme:[{p:.65,r:'5'},{p:.75,r:'5'},{p:.85,r:'5+'}]},
+  {label:'Wks 2 & 5', scheme:[{p:.70,r:'3'},{p:.80,r:'3'},{p:.90,r:'3+'}]},
+  {label:'Wks 3 & 6', scheme:[{p:.75,r:'5'},{p:.85,r:'3'},{p:.95,r:'1+'}]},
+  {label:'Deload',     scheme:[{p:.40,r:'5'},{p:.50,r:'5'},{p:.60,r:'5'}], deload:true},
+];
+
+const WARMUPS = [{p:.40,r:'5'},{p:.50,r:'5'},{p:.60,r:'3'}];
+
+const ACCESSORIES = {
+  'Squat':[
+    {main:'Romanian Deadlift',mainM:'Hamstrings, glutes',opp:'Leg Extension',oppM:'Quads',sets:'3-4',reps:'10-12',note:'Hip hinge vs quad isolation — classic hamstring/quad superset'},
+    {main:'Hip Thrust',mainM:'Glutes, hamstrings',opp:'Bulgarian Split Squat',oppM:'Quads, glutes',sets:'3-4',reps:'10-12',note:'Posterior chain + unilateral balance work'},
+    {main:'Hanging Leg Raise',mainM:'Abs',opp:'Back Extension',oppM:'Erectors, glutes',sets:'3-4',reps:'10-15',note:'Anterior vs posterior core pairing'},
+  ],
+  'Deadlift':[
+    {main:'Leg Curl',mainM:'Hamstrings',opp:'Leg Extension',oppM:'Quads',sets:'3-4',reps:'10-15',note:'Direct hamstring isolation vs quads'},
+    {main:'Good Morning',mainM:'Hamstrings, erectors',opp:'Goblet Squat',oppM:'Quads',sets:'3',reps:'8-10',note:'Hip hinge posterior chain vs anterior quad'},
+    {main:'Dead Bug',mainM:'Abs, core',opp:'Bird Dog',oppM:'Erectors, glutes',sets:'3',reps:'10 each',note:'Anti-flexion vs anti-extension core pairing'},
+  ],
+  'Bench Press':[
+    {main:'Barbell Row',mainM:'Lats, rhomboids, rear delt',opp:'Bench Press (BBB)',oppM:'Pecs, anterior delt',sets:'5',reps:'10',note:'Classic push/pull — most efficient bench day superset'},
+    {main:'Face Pull',mainM:'Rear delt, rotator cuff',opp:'DB Fly',oppM:'Pecs',sets:'3-4',reps:'15-20',note:'Shoulder health essential — never skip on press days'},
+    {main:'Chin-Up',mainM:'Lats, biceps',opp:'Skull Crusher',oppM:'Triceps',sets:'3-4',reps:'8-12',note:'Vertical pull vs tricep isolation'},
+    {main:'DB Curl',mainM:'Biceps',opp:'Tricep Pushdown',oppM:'Triceps',sets:'3',reps:'10-15',note:'Direct arm superset'},
+  ],
+  'Overhead Press':[
+    {main:'Pull-Up',mainM:'Lats, biceps',opp:'OHP (BBB sets)',oppM:'Shoulders, triceps',sets:'5',reps:'10',note:'Vertical pull vs vertical push — gold standard OHP superset'},
+    {main:'Lat Pulldown',mainM:'Lats, biceps',opp:'Lateral Raise',oppM:'Medial delt',sets:'3-4',reps:'10-12',note:'Builds shoulder width'},
+    {main:'Face Pull',mainM:'Rear delt, rotator cuff',opp:'DB Front Raise',oppM:'Anterior delt',sets:'3-4',reps:'15-20',note:'Balances all three delt heads'},
+    {main:'Hammer Curl',mainM:'Biceps, brachialis',opp:'Tricep Pushdown',oppM:'Triceps',sets:'3',reps:'10-15',note:'Arm finisher superset'},
+  ],
+};
+
+// ── State & persistence ───────────────────────────────────────────────────
+function load() {
+  try {
+    const saved = localStorage.getItem('wendler_v1');
+    if (saved) return JSON.parse(saved);
+  } catch(e){}
+  return null;
+}
+
+function save() {
+  try {
+    localStorage.setItem('wendler_v1', JSON.stringify({
+      lifts: LIFTS,
+      cycle: cycle,
+      activeWeek: activeWeek,
+    }));
+    // Show saved badge
+    const badge = document.getElementById('saveBadge');
+    if (badge) { badge.classList.add('show'); setTimeout(()=>badge.classList.remove('show'), 1500); }
+  } catch(e){}
+}
+
+const saved = load();
+const LIFTS = saved ? saved.lifts : DEFAULT_LIFTS.map(l=>({...l}));
+let cycle = saved ? saved.cycle : 1;
+let activeWeek = saved ? saved.activeWeek : 0;
+let settingsOpen = false;
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function getTM(lift){ return Math.round(lift.rm * 0.9) + (cycle-1)*lift.inc; }
+function wt(tm,pct){ return Math.round(tm*pct); }
+
+// ── Install banner ────────────────────────────────────────────────────────
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  const el = document.getElementById('installBanner');
+  if (!el || localStorage.getItem('installDismissed')) return;
+  el.innerHTML = `
+    <div class="install-banner">
+      <p><b>Add to Home Screen</b>Install this app for quick gym access — works offline too.</p>
+      <button class="install-btn" onclick="doInstall()">Install</button>
+      <button class="dismiss-btn" onclick="dismissInstall()">&#215;</button>
+    </div>`;
+}
+
+function doInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('installBanner').innerHTML = '';
+    });
+  }
+}
+
+function dismissInstall() {
+  localStorage.setItem('installDismissed', '1');
+  document.getElementById('installBanner').innerHTML = '';
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────
+function toggleSettings() {
+  settingsOpen = !settingsOpen;
+  const wrap = document.getElementById('settingsWrap');
+  wrap.style.display = settingsOpen ? 'block' : 'none';
+  if (settingsOpen) renderSettings();
+}
+
+function renderSettings() {
+  const el = document.getElementById('settingsWrap');
+  el.innerHTML = `
+    <div class="settings-wrap">
+      <div class="settings-head">
+        <h2>1RM &amp; Increase Settings <span class="save-badge" id="saveBadge">Saved</span></h2>
+        <button onclick="toggleSettings()">&#215;</button>
+      </div>
+      ${LIFTS.map((lift,i)=>`
+        <div class="settings-row">
+          <div class="lift-info">
+            <h3>${lift.name}</h3>
+            <p>TM: ${getTM(lift)} lb</p>
+          </div>
+          <div class="input-group">
+            <div class="input-col">
+              <input type="number" value="${lift.rm}" min="1" inputmode="numeric"
+                onchange="updateLift(${i},'rm',this.value)"/>
+              <label>1RM (lb)</label>
+            </div>
+            <div class="input-col">
+              <input type="number" value="${lift.inc}" min="1" inputmode="numeric"
+                onchange="updateLift(${i},'inc',this.value)"/>
+              <label>+lb/cycle</label>
+            </div>
+          </div>
+        </div>`).join('')}
+      <div class="settings-footer">
+        <p>Training Max = 90% of your 1RM. Increase cycle number each new 7-week block. All data saves automatically.</p>
+      </div>
+    </div>`;
+}
+
+function updateLift(i, field, val) {
+  const v = parseInt(val);
+  if (v > 0) { LIFTS[i][field] = v; }
+  save();
+  renderSettings();
+  renderContent();
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function renderTabs() {
+  document.getElementById('weekTabs').innerHTML = WEEKS.map((w,i)=>`
+    <div class="wtab${i===activeWeek?' active':''}${w.deload?' deload':''}"
+      onclick="setWeek(${i})">${w.label}</div>`).join('');
+}
+
+function setWeek(i) {
+  activeWeek = i;
+  save();
+  renderTabs();
+  renderContent();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Main content ──────────────────────────────────────────────────────────
+function renderContent() {
+  const week = WEEKS[activeWeek];
+  const el = document.getElementById('content');
+
+  if (week.deload) {
+    el.innerHTML = `
+      <div class="deload-msg">
+        <h2>Deload Week</h2>
+        <p>Lighter weights, no AMRAP sets.<br>Recover fully before next cycle.<br><br>
+        After this week, increase your<br>cycle number by 1.</p>
+      </div>
+      ${LIFTS.map(lift => {
+        const tm = getTM(lift);
+        return `<div class="lift-card">
+          <div class="lift-hdr" style="background:${lift.color}">
+            <h2>${lift.name}</h2><span>TM: ${tm} lb</span>
+          </div>
+          <div class="section-lbl">Sets</div>
+          ${week.scheme.map((s,i)=>`
+            <div class="set-row">
+              <span class="s-label wt">Set ${i+1}</span>
+              <span class="s-pct">${Math.round(s.p*100)}%</span>
+              <span class="s-weight">${wt(tm,s.p)} lb</span>
+              <span class="s-reps">${s.r} reps</span>
+            </div>`).join('')}
+        </div>`;
+      }).join('')}`;
+    return;
+  }
+
+  el.innerHTML = LIFTS.map(lift => {
+    const tm = getTM(lift);
+    const accs = ACCESSORIES[lift.name] || [];
+    return `
+    <div class="lift-card">
+      <div class="lift-hdr" style="background:${lift.color}">
+        <h2>${lift.name}</h2><span>TM: ${tm} lb</span>
+      </div>
+      <div class="tm-bar">TM <b>${tm} lb</b> &nbsp;·&nbsp; Cycle ${cycle} &nbsp;·&nbsp; +${lift.inc} lb/cycle</div>
+      <div class="section-lbl">Warm-up</div>
+      ${WARMUPS.map((w,i)=>`
+        <div class="set-row wu">
+          <span class="s-label">Warm-up ${i+1}</span>
+          <span class="s-pct">${Math.round(w.p*100)}%</span>
+          <span class="s-weight">${wt(tm,w.p)} lb</span>
+          <span class="s-reps">${w.r} reps</span>
+        </div>`).join('')}
+      <div class="section-lbl">Working sets</div>
+      ${week.scheme.map((set,i)=>{
+        const amrap = set.r.endsWith('+');
+        return `<div class="set-row${amrap?' amrap':''}">
+          <span class="s-label wt">Set ${i+1}</span>
+          <span class="s-pct">${Math.round(set.p*100)}%</span>
+          <span class="s-weight">${wt(tm,set.p)} lb</span>
+          <span class="s-reps${amrap?' amrap':''}">${set.r}${amrap?' AMRAP':' reps'}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="acc-section-lbl">Accessories &amp; supersets</div>
+    ${accs.map(a=>`
+      <div class="acc-card">
+        <div class="acc-hdr"><h3>${a.main}</h3><p>${a.mainM}</p></div>
+        <div class="acc-body">
+          <div class="acc-pair">
+            <span class="ss-badge">SS</span>
+            <div class="acc-side">
+              <h4>${a.opp}</h4>
+              <p>${a.oppM}</p>
+              <div class="acc-pills">
+                <span class="acc-pill">${a.sets} sets</span>
+                <span class="acc-pill">${a.reps} reps</span>
+              </div>
+            </div>
+          </div>
+          <div class="acc-note">${a.note}</div>
+        </div>
+      </div>`).join('')}`;
+  }).join('');
+}
+
+// ── Cycle input ───────────────────────────────────────────────────────────
+document.getElementById('cycleInput').value = cycle;
+document.getElementById('cycleInput').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  if (v >= 1) { cycle = v; save(); renderContent(); if(settingsOpen) renderSettings(); }
+});
+
+// ── Service worker ────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+renderTabs();
+renderContent();
+</script>
+</body>
+</html>
