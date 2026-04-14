@@ -45,6 +45,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .input-col label{font-size:10px;color:#999;font-weight:500}
 .settings-footer{padding:10px 14px;background:#f8f8f8;border-top:1px solid #f0f0f0}
 .settings-footer p{font-size:11px;color:#888;line-height:1.6}
+.backup-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid #f0f0f0}
+.backup-btn{flex:1;padding:9px 8px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid #ddd;background:#fff;color:#1a1a1a;text-align:center}
+.backup-btn.export{border-color:#1F3864;color:#1F3864}
+.backup-btn.import{border-color:#375623;color:#375623}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity 0.3s;white-space:nowrap}
+.toast.show{opacity:1}
 .save-badge{display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px;opacity:0;transition:opacity 0.3s}
 .save-badge.show{opacity:1}
 .lift-card{background:#fff;border-radius:14px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
@@ -108,6 +114,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </style>
 </head>
 <body>
+
+<div id="toast" class="toast"></div>
 
 <div class="screen active" id="screenHome">
   <div class="top-bar">
@@ -249,7 +257,12 @@ function renderSettings(){
             </div>
           </div>
         </div>`).join('')}
-      <div class="settings-footer"><p>TM = 90% of 1RM. Bump cycle number after every Week 7 deload. Data saves automatically.</p></div>
+      <div class="backup-row">
+        <button class="backup-btn export" onclick="exportData()">&#8659; Export backup</button>
+        <button class="backup-btn import" onclick="document.getElementById('importFile').click()">&#8657; Import backup</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)"/>
+      <div class="settings-footer"><p>TM = 90% of 1RM. Bump cycle number after every Week 7 deload. Data saves automatically. Use Export/Import to move data to a new phone.</p></div>
     </div>`;
 }
 function updateLift(i,f,v){const n=parseInt(v);if(n>0)LIFTS[i][f]=n;saveState();renderSettings();renderContent();}
@@ -449,6 +462,51 @@ function drawChart(canvas,entries,color){
     const lbl=`C${e.cycle} ${(WEEK_LABELS[e.weekKey]||'').replace('Wks ','')}`;
     ctx.fillText(lbl,x+barW/2,pad.top+ch+20);
   });
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function exportData(){
+  const data={lifts:LIFTS,cycle,activeWeek,repLog,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`wendler-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Backup downloaded!');
+}
+
+function importData(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.lifts||!Array.isArray(data.lifts)) throw new Error('Invalid file');
+      // Restore all fields
+      data.lifts.forEach((l,i)=>{ if(LIFTS[i]){ LIFTS[i].rm=l.rm; LIFTS[i].inc=l.inc; }});
+      cycle = data.cycle||1;
+      activeWeek = data.activeWeek||0;
+      repLog = data.repLog||[];
+      saveState();
+      document.getElementById('cycleInput').value=cycle;
+      renderSettings();
+      renderTabs();
+      renderContent();
+      showToast('Data restored successfully!');
+    }catch(err){
+      showToast('Error — invalid backup file');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
 }
 
 document.getElementById('cycleInput').value=cycle;
